@@ -250,4 +250,5 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-
+# macOS stuff
+.DS_Store
