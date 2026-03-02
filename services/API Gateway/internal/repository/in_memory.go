@@ -19,7 +19,13 @@ type InMemoryStorage struct {
 }
 
 func NewInMemoryStorage() *InMemoryStorage {
-	return &InMemoryStorage{validate: validator.New()}
+	return &InMemoryStorage{
+		managers:     make(map[uuid.UUID]*entity.Manager),
+		employees:    make(map[uuid.UUID]*entity.Employee),
+		photos:       make(map[uuid.UUID]*entity.Photo),
+		screenshots:  make(map[uuid.UUID][]*entity.ScreenshotStatistic),
+		workSessions: make(map[uuid.UUID][]*entity.WorkSession),
+		validate:     validator.New()}
 }
 
 func (i *InMemoryStorage) AddManager(manager entity.Manager) (uuid.UUID, error) {
