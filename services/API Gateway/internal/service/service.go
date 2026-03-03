@@ -54,7 +54,7 @@ func (a *APIServiceImpl) SaveToken(tokenID, userID string, expiresAt time.Time) 
 	return a.storage.SaveToken(tokenID, userID, expiresAt)
 }
 
-// NewAPIService constructor
+// NewAPIService constructor for NewAPIService
 func NewAPIService(storage Storage) *APIServiceImpl {
 	return &APIServiceImpl{storage: storage}
 }
