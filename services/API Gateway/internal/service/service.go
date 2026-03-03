@@ -10,6 +10,8 @@ import (
 
 // Storage interface for repository
 type Storage interface {
+	FindUser(userId uuid.UUID) (string, error)
+
 	AddManager(manager entity.Manager) (uuid.UUID, error)
 	RemoveManager(managerID uuid.UUID) error
 
@@ -25,11 +27,31 @@ type Storage interface {
 	StartWorkSession(employeeID uuid.UUID) (uuid.UUID, error)
 	StopWorkSession(employeeID uuid.UUID) (uuid.UUID, error)
 	GetWorkSessions(employeeID uuid.UUID, date time.Time) ([]entity.WorkSession, error)
+
+	SaveToken(tokenID, userID string, expiresAt time.Time) error
+	ExistsToken(tokenID string) (bool, error)
+	DeleteToken(tokenID string) error
 }
 
 // APIServiceImpl implementation for ApiService interface
 type APIServiceImpl struct {
 	storage Storage
+}
+
+func (a *APIServiceImpl) Auth(ctx context.Context, userId uuid.UUID) (string, error) {
+	return a.storage.FindUser(userId)
+}
+
+func (a *APIServiceImpl) DeleteToken(tokenID string) error {
+	return a.storage.DeleteToken(tokenID)
+}
+
+func (a *APIServiceImpl) ExistsToken(tokenID string) (bool, error) {
+	return a.storage.ExistsToken(tokenID)
+}
+
+func (a *APIServiceImpl) SaveToken(tokenID, userID string, expiresAt time.Time) error {
+	return a.storage.SaveToken(tokenID, userID, expiresAt)
 }
 
 // NewAPIService constructor

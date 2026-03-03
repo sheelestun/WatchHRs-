@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -10,23 +11,45 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+type refreshToken struct {
+	UserID    string
+	ExpiresAt time.Time
+}
+
 type InMemoryStorage struct {
 	managers     map[uuid.UUID]*entity.Manager
 	employees    map[uuid.UUID]*entity.Employee
 	photos       map[uuid.UUID]*entity.Photo
 	screenshots  map[uuid.UUID][]*entity.ScreenshotStatistic
 	workSessions map[uuid.UUID][]*entity.WorkSession
-	validate     *validator.Validate
+
+	refreshTokens map[string]refreshToken
+
+	validate *validator.Validate
 }
 
 func NewInMemoryStorage() *InMemoryStorage {
 	return &InMemoryStorage{
-		managers:     make(map[uuid.UUID]*entity.Manager),
-		employees:    make(map[uuid.UUID]*entity.Employee),
-		photos:       make(map[uuid.UUID]*entity.Photo),
-		screenshots:  make(map[uuid.UUID][]*entity.ScreenshotStatistic),
-		workSessions: make(map[uuid.UUID][]*entity.WorkSession),
-		validate:     validator.New()}
+		managers:      make(map[uuid.UUID]*entity.Manager),
+		employees:     make(map[uuid.UUID]*entity.Employee),
+		photos:        make(map[uuid.UUID]*entity.Photo),
+		screenshots:   make(map[uuid.UUID][]*entity.ScreenshotStatistic),
+		workSessions:  make(map[uuid.UUID][]*entity.WorkSession),
+		refreshTokens: make(map[string]refreshToken),
+		validate:      validator.New()}
+}
+
+func (i *InMemoryStorage) FindUser(userId uuid.UUID) (string, error) {
+	_, ok := i.managers[userId]
+	if ok {
+		return "manager", nil
+	}
+	_, ok = i.employees[userId]
+	if ok {
+		return "employee", nil
+	}
+	
+	return "", fmt.Errorf(`user "%s" not found`, userId)
 }
 
 func (i *InMemoryStorage) AddManager(manager entity.Manager) (uuid.UUID, error) {
@@ -168,4 +191,31 @@ func (i *InMemoryStorage) GetWorkSessions(employeeID uuid.UUID, date time.Time) 
 		return resWorkSessions, nil
 	}
 	return resWorkSessions, errors.New("work session does not exist by this employee and date")
+}
+
+func (i *InMemoryStorage) SaveToken(tokenID, userID string, expiresAt time.Time) error {
+	i.refreshTokens[tokenID] = refreshToken{
+		UserID:    userID,
+		ExpiresAt: expiresAt,
+	}
+
+	return nil
+}
+
+func (i *InMemoryStorage) ExistsToken(tokenID string) (bool, error) {
+	token, ok := i.refreshTokens[tokenID]
+	if !ok {
+		return false, nil
+	}
+
+	if time.Now().After(token.ExpiresAt) {
+		return false, nil
+	}
+
+	return true, nil
+}
+
+func (i *InMemoryStorage) DeleteToken(tokenID string) error {
+	delete(i.refreshTokens, tokenID)
+	return nil
 }

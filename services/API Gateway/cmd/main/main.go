@@ -17,7 +17,7 @@ func main() {
 	log.SetLevel(log.DebugLevel)
 	repo := repository.NewInMemoryStorage()
 	serv := service.NewAPIService(repo)
-	hand := handler.NewApiHandler(serv)
+	hand := handler.NewApiHandler(serv, []byte("a-string-secret-at-least-256-bits-long"))
 	r := router.NewRouter(hand)
 	err := http.ListenAndServe(":8080", r)
 	if err != nil {

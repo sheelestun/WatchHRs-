@@ -17,6 +17,8 @@ import (
 )
 
 type ApiService interface {
+	Auth(ctx context.Context, userId uuid.UUID) (string, error)
+
 	AddManager(ctx context.Context, manager entity.Manager) (uuid.UUID, error)
 	RemoveManager(ctx context.Context, managerID uuid.UUID) error
 
@@ -32,24 +34,139 @@ type ApiService interface {
 	StartWorkSession(ctx context.Context, employeeID uuid.UUID) (uuid.UUID, error)
 	StopWorkSession(ctx context.Context, employeeID uuid.UUID) (uuid.UUID, error)
 	GetWorkSessions(ctx context.Context, employeeID uuid.UUID, date time.Time) ([]entity.WorkSession, error)
+
+	SaveToken(tokenID, userID string, expiresAt time.Time) error
+	ExistsToken(tokenID string) (bool, error)
+	DeleteToken(tokenID string) error
 }
 
 type ApiHandler struct {
 	apiService ApiService
+	jwtSecret  []byte
 }
 
-func NewApiHandler(apiService ApiService) *ApiHandler {
-	return &ApiHandler{apiService: apiService}
+func NewApiHandler(apiService ApiService, jwtSecret []byte) *ApiHandler {
+	return &ApiHandler{apiService: apiService, jwtSecret: jwtSecret}
 }
 
-func (handler *ApiHandler) AuthEmployeeHandler(w http.ResponseWriter, r *http.Request) {
-	log.Warn("AuthEmployeeHandler is not implemented")
-	http.Error(w, "AuthEmployeeHandler is not implemented", http.StatusNotImplemented)
+func (handler *ApiHandler) AuthHandler(w http.ResponseWriter, r *http.Request) {
+	type TestRequest struct {
+		UserID string `json:"userID"`
+	}
+
+	var req TestRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Error(err)
+		return
+	}
+
+	userId, err := uuid.Parse(req.UserID)
+	if err != nil {
+		http.Error(w, "invalid manager uuid", http.StatusBadRequest)
+		log.Error(err)
+	}
+
+	role, err := handler.apiService.Auth(r.Context(), userId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		log.Error(err)
+		return
+	}
+
+	accessToken, refreshToken, err := handler.generateTokens(userId.String(), role)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		log.Error(err)
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    refreshToken,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
+		Expires:  time.Now().Add(7 * 24 * time.Hour),
+	})
+
+	type AuthResponse struct {
+		UserID      string `json:"userID"`
+		Role        string `json:"role"`
+		AccessToken string `json:"accessToken"`
+	}
+
+	authResponse := AuthResponse{
+		UserID:      userId.String(),
+		Role:        role,
+		AccessToken: accessToken,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(authResponse); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Error(err)
+		return
+	}
 }
 
-func (handler *ApiHandler) AuthManagerHandler(w http.ResponseWriter, r *http.Request) {
-	log.Warn("AuthManagerHandler is not implemented")
-	http.Error(w, "AuthManagerHandler is not implemented", http.StatusNotImplemented)
+func (handler *ApiHandler) RefreshTokenHandler(w http.ResponseWriter, r *http.Request) {
+	refreshToken, err := extractRefreshToken(r)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Error(err)
+		return
+	}
+	token, err := handler.parseRefreshToken(refreshToken)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Error(err)
+		return
+	}
+
+	role, err := handler.apiService.Auth(r.Context(), uuid.MustParse(token.UserID))
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		log.Error(err)
+		return
+	}
+
+	accessToken, refreshToken, err := handler.generateTokens(token.UserID, role)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		log.Error(err)
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    refreshToken,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
+		Expires:  time.Now().Add(7 * 24 * time.Hour),
+	})
+
+	type AuthResponse struct {
+		UserID      string `json:"userID"`
+		Role        string `json:"role"`
+		AccessToken string `json:"accessToken"`
+	}
+
+	authResponse := AuthResponse{
+		UserID:      token.UserID,
+		Role:        role,
+		AccessToken: accessToken,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(authResponse); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Error(err)
+		return
+	}
 }
 
 func (handler *ApiHandler) AddScreenshotHandler(w http.ResponseWriter, r *http.Request) {
@@ -200,7 +317,7 @@ func (handler *ApiHandler) AddScreenshotStatisticHandler(w http.ResponseWriter, 
 	}
 
 	var screenshotStatistic entity.ScreenshotStatistic
-	if err := json.NewDecoder(r.Body).Decode(&screenshotStatistic); err != nil {
+	if err = json.NewDecoder(r.Body).Decode(&screenshotStatistic); err != nil {
 		http.Error(w, "invalid json body", http.StatusBadRequest)
 		log.Error(err)
 		return
@@ -370,6 +487,32 @@ func (handler *ApiHandler) AddEmployeeInfoHandler(w http.ResponseWriter, r *http
 	}
 
 	if err = json.NewEncoder(w).Encode(EmployeeInfoResponse{employeeID.String()}); err != nil {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		log.Error(err)
+		return
+	}
+}
+
+func (handler *ApiHandler) AddManagerInfoHandler(w http.ResponseWriter, r *http.Request) {
+	var newManager entity.Manager
+	if err := json.NewDecoder(r.Body).Decode(&newManager); err != nil {
+		http.Error(w, "invalid json body", http.StatusBadRequest)
+		log.Error(err)
+		return
+	}
+
+	employeeID, err := handler.apiService.AddManager(r.Context(), newManager)
+	if err != nil {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		log.Error(err)
+		return
+	}
+
+	type ManagerInfoResponse struct {
+		ManagerID string `json:"managerId"`
+	}
+
+	if err = json.NewEncoder(w).Encode(ManagerInfoResponse{employeeID.String()}); err != nil {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		log.Error(err)
 		return
