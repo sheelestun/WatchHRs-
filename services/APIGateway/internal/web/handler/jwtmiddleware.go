@@ -62,7 +62,7 @@ func (handler *ApiHandler) generateTokens(userID, role string) (string, string, 
 	}
 
 	// сохраняем refresh в storage
-	err = handler.apiService.SaveToken(tokenID, userID, refreshClaims.ExpiresAt.Time)
+	err = handler.apiService.SaveToken(context.Background(), tokenID, userID, refreshClaims.ExpiresAt.Time)
 	if err != nil {
 		return "", "", err
 	}
@@ -114,7 +114,7 @@ func (handler *ApiHandler) parseRefreshToken(tokenStr string) (*RefreshClaims, e
 		return nil, errors.New("invalid refresh token")
 	}
 
-	exists, err := handler.apiService.ExistsToken(claims.TokenID)
+	exists, err := handler.apiService.ExistsToken(context.Background(), claims.TokenID)
 	if err != nil {
 		return nil, err
 	}

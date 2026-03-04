@@ -1,11 +1,11 @@
 package repository
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/sheelestun/WatchHRs-/internal/entity"
 	log "github.com/sirupsen/logrus"
@@ -24,8 +24,6 @@ type InMemoryStorage struct {
 	workSessions map[uuid.UUID][]*entity.WorkSession
 
 	refreshTokens map[string]refreshToken
-
-	validate *validator.Validate
 }
 
 func NewInMemoryStorage() *InMemoryStorage {
@@ -36,10 +34,10 @@ func NewInMemoryStorage() *InMemoryStorage {
 		screenshots:   make(map[uuid.UUID][]*entity.ScreenshotStatistic),
 		workSessions:  make(map[uuid.UUID][]*entity.WorkSession),
 		refreshTokens: make(map[string]refreshToken),
-		validate:      validator.New()}
+	}
 }
 
-func (i *InMemoryStorage) FindUser(userId uuid.UUID) (string, error) {
+func (i *InMemoryStorage) FindUser(ctx context.Context, userId uuid.UUID) (string, error) {
 	_, ok := i.managers[userId]
 	if ok {
 		return "manager", nil
@@ -48,21 +46,17 @@ func (i *InMemoryStorage) FindUser(userId uuid.UUID) (string, error) {
 	if ok {
 		return "employee", nil
 	}
-	
+
 	return "", fmt.Errorf(`user "%s" not found`, userId)
 }
 
-func (i *InMemoryStorage) AddManager(manager entity.Manager) (uuid.UUID, error) {
-	manager.ID = uuid.New()
-	if err := i.validate.Struct(manager); err != nil {
-		return uuid.Nil, err
-	}
+func (i *InMemoryStorage) AddManager(ctx context.Context, manager entity.Manager) (uuid.UUID, error) {
 	i.managers[manager.ID] = &manager
 	log.Debugf("Added manager: %+v", manager)
 	return manager.ID, nil
 }
 
-func (i *InMemoryStorage) RemoveManager(managerID uuid.UUID) error {
+func (i *InMemoryStorage) RemoveManager(ctx context.Context, managerID uuid.UUID) error {
 	if _, exists := i.managers[managerID]; !exists {
 		return errors.New("manager does not exist")
 	}
@@ -72,17 +66,13 @@ func (i *InMemoryStorage) RemoveManager(managerID uuid.UUID) error {
 	return nil
 }
 
-func (i *InMemoryStorage) AddEmployee(employee entity.Employee) (uuid.UUID, error) {
-	employee.ID = uuid.New()
-	if err := i.validate.Struct(employee); err != nil {
-		return uuid.Nil, err
-	}
+func (i *InMemoryStorage) AddEmployee(ctx context.Context, employee entity.Employee) (uuid.UUID, error) {
 	i.employees[employee.ID] = &employee
 	log.Debugf("Added employee: %+v", employee)
 	return employee.ID, nil
 }
 
-func (i *InMemoryStorage) GetAllEmployeesByManagerID(managerID uuid.UUID) ([]entity.Employee, error) {
+func (i *InMemoryStorage) GetAllEmployeesByManagerID(ctx context.Context, managerID uuid.UUID) ([]entity.Employee, error) {
 	employees := make([]entity.Employee, 0)
 	for _, employee := range i.employees {
 		if employee.ManagerID == managerID {
@@ -96,7 +86,7 @@ func (i *InMemoryStorage) GetAllEmployeesByManagerID(managerID uuid.UUID) ([]ent
 	return employees, nil
 }
 
-func (i *InMemoryStorage) RemoveEmployee(employeeID uuid.UUID) error {
+func (i *InMemoryStorage) RemoveEmployee(ctx context.Context, employeeID uuid.UUID) error {
 	if _, exists := i.employees[employeeID]; !exists {
 		return errors.New("employee does not exist")
 	}
@@ -106,22 +96,13 @@ func (i *InMemoryStorage) RemoveEmployee(employeeID uuid.UUID) error {
 	return nil
 }
 
-func (i *InMemoryStorage) AddPhoto(photo entity.Photo) (uuid.UUID, error) {
-	photo.ID = photo.UserID
-	if err := i.validate.Struct(photo); err != nil {
-		return uuid.Nil, err
-	}
+func (i *InMemoryStorage) AddPhoto(ctx context.Context, photo entity.Photo) (uuid.UUID, error) {
 	i.photos[photo.ID] = &photo
 	log.Debugf("Added photo: %+v", photo)
 	return photo.ID, nil
 }
 
-func (i *InMemoryStorage) AddScreenshotStatistic(screenshot entity.ScreenshotStatistic) (uuid.UUID, error) {
-	screenshot.ID = uuid.New()
-	screenshot.Timestamp = time.Now()
-	if err := i.validate.Struct(screenshot); err != nil {
-		return uuid.Nil, err
-	}
+func (i *InMemoryStorage) AddScreenshotStatistic(ctx context.Context, screenshot entity.ScreenshotStatistic) (uuid.UUID, error) {
 	screenshots := i.screenshots[screenshot.ID]
 	screenshots = append(screenshots, &screenshot)
 	i.screenshots[screenshot.EmployeeID] = screenshots
@@ -129,7 +110,7 @@ func (i *InMemoryStorage) AddScreenshotStatistic(screenshot entity.ScreenshotSta
 	return screenshot.ID, nil
 }
 
-func (i *InMemoryStorage) GetScreenshotsStatistic(employeeID uuid.UUID, date time.Time) ([]entity.ScreenshotStatistic, error) {
+func (i *InMemoryStorage) GetScreenshotsStatistic(ctx context.Context, employeeID uuid.UUID, date time.Time) ([]entity.ScreenshotStatistic, error) {
 	resScreenshots := make([]entity.ScreenshotStatistic, 0)
 
 	if screenshots, exists := i.screenshots[employeeID]; exists {
@@ -144,24 +125,20 @@ func (i *InMemoryStorage) GetScreenshotsStatistic(employeeID uuid.UUID, date tim
 	return resScreenshots, errors.New("screenshot does not exist by this employee and date")
 }
 
-func (i *InMemoryStorage) StartWorkSession(employeeID uuid.UUID) (uuid.UUID, error) {
-	newSession := entity.WorkSession{ID: uuid.New(), EmployeeID: employeeID, StartTime: time.Now()}
-	if err := i.validate.Struct(newSession); err != nil {
-		return uuid.Nil, err
-	}
-	workSessions := i.workSessions[employeeID]
+func (i *InMemoryStorage) StartWorkSession(ctx context.Context, session entity.WorkSession) (uuid.UUID, error) {
+	workSessions := i.workSessions[session.EmployeeID]
 	if len(workSessions) != 0 {
 		if lastWorkSession := workSessions[len(workSessions)-1]; lastWorkSession.EndTime.IsZero() {
 			return uuid.Nil, errors.New("last work session did not stop yet")
 		}
 	}
-	workSessions = append(workSessions, &newSession)
-	i.workSessions[newSession.EmployeeID] = workSessions
-	log.Debugf("Started work session: %+v", newSession)
-	return newSession.ID, nil
+	workSessions = append(workSessions, &session)
+	i.workSessions[session.EmployeeID] = workSessions
+	log.Debugf("Started work session: %+v", session)
+	return session.ID, nil
 }
 
-func (i *InMemoryStorage) StopWorkSession(employeeID uuid.UUID) (uuid.UUID, error) {
+func (i *InMemoryStorage) StopWorkSession(ctx context.Context, employeeID uuid.UUID) (uuid.UUID, error) {
 	workSessions := i.workSessions[employeeID]
 	if len(workSessions) == 0 {
 		return uuid.Nil, errors.New("work sessions do not exist")
@@ -179,7 +156,7 @@ func (i *InMemoryStorage) StopWorkSession(employeeID uuid.UUID) (uuid.UUID, erro
 	return lastWorkSession.ID, nil
 }
 
-func (i *InMemoryStorage) GetWorkSessions(employeeID uuid.UUID, date time.Time) ([]entity.WorkSession, error) {
+func (i *InMemoryStorage) GetWorkSessions(ctx context.Context, employeeID uuid.UUID, date time.Time) ([]entity.WorkSession, error) {
 	resWorkSessions := make([]entity.WorkSession, 0)
 	if workSessions, exists := i.workSessions[employeeID]; exists {
 		for _, workSession := range workSessions {
@@ -193,7 +170,7 @@ func (i *InMemoryStorage) GetWorkSessions(employeeID uuid.UUID, date time.Time) 
 	return resWorkSessions, errors.New("work session does not exist by this employee and date")
 }
 
-func (i *InMemoryStorage) SaveToken(tokenID, userID string, expiresAt time.Time) error {
+func (i *InMemoryStorage) SaveTokenInCache(ctx context.Context, tokenID, userID string, expiresAt time.Time) error {
 	i.refreshTokens[tokenID] = refreshToken{
 		UserID:    userID,
 		ExpiresAt: expiresAt,
@@ -202,7 +179,7 @@ func (i *InMemoryStorage) SaveToken(tokenID, userID string, expiresAt time.Time)
 	return nil
 }
 
-func (i *InMemoryStorage) ExistsToken(tokenID string) (bool, error) {
+func (i *InMemoryStorage) ExistsTokenInCache(ctx context.Context, tokenID string) (bool, error) {
 	token, ok := i.refreshTokens[tokenID]
 	if !ok {
 		return false, nil
@@ -215,7 +192,7 @@ func (i *InMemoryStorage) ExistsToken(tokenID string) (bool, error) {
 	return true, nil
 }
 
-func (i *InMemoryStorage) DeleteToken(tokenID string) error {
+func (i *InMemoryStorage) DeleteTokenInCache(ctx context.Context, tokenID string) error {
 	delete(i.refreshTokens, tokenID)
 	return nil
 }

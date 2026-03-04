@@ -1,0 +1,12 @@
+FROM golang:1.25-alpine
+
+WORKDIR /app
+
+COPY ./APIGateway/migrations ./migrations
+COPY ./APIGateway/go.mod ./go.mod
+COPY ./APIGateway/go.sum ./go.sum
+
+RUN go install github.com/pressly/goose/v3/cmd/goose@latest
+
+ENTRYPOINT ["/go/bin/goose"]
+CMD ["-dir", "./migrations", "postgres", "postgres://api_gateway_user:api_gateway_pass@postgres:5432/watch_hrs?sslmode=disable", "up"]

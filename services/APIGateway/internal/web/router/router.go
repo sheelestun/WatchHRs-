@@ -1,6 +1,8 @@
 package router
 
 import (
+	"net/http"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/sheelestun/WatchHRs-/internal/web/handler"
@@ -11,6 +13,11 @@ func NewRouter(apiHandler *handler.ApiHandler) *chi.Mux {
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+
+	// --- HealthCheck ---
+	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
 
 	// --- Public ---
 	r.Post("/auth", apiHandler.AuthHandler)

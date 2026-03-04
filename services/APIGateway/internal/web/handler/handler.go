@@ -23,7 +23,7 @@ type ApiService interface {
 	RemoveManager(ctx context.Context, managerID uuid.UUID) error
 
 	AddEmployee(ctx context.Context, employee entity.Employee) (uuid.UUID, error)
-	GetEmployeesByManagerID(managerID uuid.UUID) ([]entity.Employee, error)
+	GetEmployeesByManagerID(ctx context.Context, managerID uuid.UUID) ([]entity.Employee, error)
 	RemoveEmployee(ctx context.Context, employeeID uuid.UUID) error
 
 	AddPhoto(ctx context.Context, photo entity.Photo) (uuid.UUID, error)
@@ -35,9 +35,9 @@ type ApiService interface {
 	StopWorkSession(ctx context.Context, employeeID uuid.UUID) (uuid.UUID, error)
 	GetWorkSessions(ctx context.Context, employeeID uuid.UUID, date time.Time) ([]entity.WorkSession, error)
 
-	SaveToken(tokenID, userID string, expiresAt time.Time) error
-	ExistsToken(tokenID string) (bool, error)
-	DeleteToken(tokenID string) error
+	SaveToken(ctx context.Context, tokenID, userID string, expiresAt time.Time) error
+	ExistsToken(ctx context.Context, tokenID string) (bool, error)
+	DeleteToken(ctx context.Context, tokenID string) error
 }
 
 type ApiHandler struct {
@@ -615,7 +615,7 @@ func (handler *ApiHandler) GetAllEmployeesInfoByManagerIDHandler(w http.Response
 		log.Error(err)
 	}
 
-	employees, err := handler.apiService.GetEmployeesByManagerID(managerID)
+	employees, err := handler.apiService.GetEmployeesByManagerID(r.Context(), managerID)
 	if err != nil {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		log.Error(err)
