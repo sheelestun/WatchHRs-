@@ -1,4 +1,4 @@
-package middleware
+package handler
 
 import (
 	"context"
@@ -9,15 +9,8 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"github.com/sheelestun/WatchHRs-/internal/web/handler"
 	log "github.com/sirupsen/logrus"
 )
-
-type AuthService interface {
-}
-
-type Jwt struct {
-}
 
 type AccessClaims struct {
 	UserID string `json:"user_id"`
@@ -31,7 +24,7 @@ type RefreshClaims struct {
 	jwt.RegisteredClaims
 }
 
-func (handler *handler.ApiHandler) generateTokens(userID, role string) (string, string, error) {
+func (handler *AuthHandler) generateTokens(userID, role string) (string, string, error) {
 	now := time.Now()
 
 	// Access Token
@@ -69,7 +62,7 @@ func (handler *handler.ApiHandler) generateTokens(userID, role string) (string, 
 	}
 
 	// сохраняем refresh в storage
-	err = handler.apiService.SaveToken(context.Background(), tokenID, userID, refreshClaims.ExpiresAt.Time)
+	err = handler.authService.SaveToken(context.Background(), tokenID, userID, refreshClaims.ExpiresAt.Time)
 	if err != nil {
 		return "", "", err
 	}
@@ -79,7 +72,7 @@ func (handler *handler.ApiHandler) generateTokens(userID, role string) (string, 
 
 type claimsKey struct{}
 
-func (handler *handler.ApiHandler) JWTMiddleware(next http.Handler) http.Handler {
+func (handler *AuthHandler) JWTMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		tokenStr, err := extractAccessToken(r)
@@ -100,7 +93,7 @@ func (handler *handler.ApiHandler) JWTMiddleware(next http.Handler) http.Handler
 	})
 }
 
-func (handler *handler.ApiHandler) parseRefreshToken(tokenStr string) (*RefreshClaims, error) {
+func (handler *AuthHandler) parseRefreshToken(tokenStr string) (*RefreshClaims, error) {
 	token, err := jwt.ParseWithClaims(
 		tokenStr,
 		&RefreshClaims{},
@@ -121,7 +114,7 @@ func (handler *handler.ApiHandler) parseRefreshToken(tokenStr string) (*RefreshC
 		return nil, errors.New("invalid refresh token")
 	}
 
-	exists, err := handler.apiService.ExistsToken(context.Background(), claims.TokenID)
+	exists, err := handler.authService.ExistsToken(context.Background(), claims.TokenID)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +125,7 @@ func (handler *handler.ApiHandler) parseRefreshToken(tokenStr string) (*RefreshC
 	return claims, nil
 }
 
-func (handler *handler.ApiHandler) parseToken(tokenStr string) (*AccessClaims, error) {
+func (handler *AuthHandler) parseToken(tokenStr string) (*AccessClaims, error) {
 	token, err := jwt.ParseWithClaims(
 		tokenStr,
 		&AccessClaims{},
