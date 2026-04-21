@@ -9,19 +9,19 @@ import (
 	"github.com/sheelestun/WatchHRs-/internal/web/handler"
 )
 
-type PhotoStorage interface {
-	AddPhoto(ctx context.Context, photo domain.Image) (uuid.UUID, error)
+type ImageStorage interface {
+	AddImage(ctx context.Context, photo domain.Image) (uuid.UUID, error)
 }
 
 type _ handler.ImageService
 
 type imageService struct {
-	photoStorage PhotoStorage
+	imageStorage ImageStorage
 	validate     *validator.Validate
 }
 
-func NewPhotoService(photoStorage PhotoStorage, validate *validator.Validate) handler.ImageService {
-	return &imageService{photoStorage: photoStorage, validate: validate}
+func NewImageService(photoStorage ImageStorage, validate *validator.Validate) handler.ImageService {
+	return &imageService{imageStorage: photoStorage, validate: validate}
 }
 
 func (s *imageService) AddImage(ctx context.Context, image domain.Image) (uuid.UUID, error) {
@@ -29,5 +29,5 @@ func (s *imageService) AddImage(ctx context.Context, image domain.Image) (uuid.U
 	if err := s.validate.Struct(image); err != nil {
 		return uuid.Nil, err
 	}
-	return s.photoStorage.AddPhoto(ctx, image)
+	return s.imageStorage.AddImage(ctx, image)
 }

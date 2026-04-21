@@ -15,16 +15,16 @@ type WorkSessionStorage interface {
 	GetWorkSessions(ctx context.Context, employeeID uuid.UUID, date time.Time) ([]domain.WorkSession, error)
 }
 
-type WorkSessionServiceImpl struct {
+type workSessionService struct {
 	workSessionStorage WorkSessionStorage
 	validate           *validator.Validate
 }
 
-func NewWorkSessionServiceImpl(WorkSessionStorage WorkSessionStorage, validate *validator.Validate) *WorkSessionServiceImpl {
-	return &WorkSessionServiceImpl{workSessionStorage: WorkSessionStorage, validate: validate}
+func NewWorkSessionService(WorkSessionStorage WorkSessionStorage, validate *validator.Validate) WorkSessionService {
+	return &workSessionService{workSessionStorage: WorkSessionStorage, validate: validate}
 }
 
-func (w *WorkSessionServiceImpl) StartWorkSession(ctx context.Context, employeeID uuid.UUID) (uuid.UUID, error) {
+func (w *workSessionService) StartWorkSession(ctx context.Context, employeeID uuid.UUID) (uuid.UUID, error) {
 	newSession := domain.WorkSession{ID: uuid.New(), EmployeeID: employeeID, StartTime: time.Now()}
 	if err := w.validate.Struct(newSession); err != nil {
 		return uuid.Nil, err
@@ -32,10 +32,10 @@ func (w *WorkSessionServiceImpl) StartWorkSession(ctx context.Context, employeeI
 	return w.workSessionStorage.StartWorkSession(ctx, newSession)
 }
 
-func (w *WorkSessionServiceImpl) StopWorkSession(ctx context.Context, employeeID uuid.UUID) (uuid.UUID, error) {
+func (w *workSessionService) StopWorkSession(ctx context.Context, employeeID uuid.UUID) (uuid.UUID, error) {
 	return w.workSessionStorage.StopWorkSession(ctx, employeeID)
 }
 
-func (w *WorkSessionServiceImpl) GetWorkSessions(ctx context.Context, employeeID uuid.UUID, date time.Time) ([]domain.WorkSession, error) {
+func (w *workSessionService) GetWorkSessions(ctx context.Context, employeeID uuid.UUID, date time.Time) ([]domain.WorkSession, error) {
 	return w.workSessionStorage.GetWorkSessions(ctx, employeeID, date)
 }

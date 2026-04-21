@@ -6,6 +6,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/sheelestun/WatchHRs-/internal/domain"
+	"github.com/sheelestun/WatchHRs-/internal/web/handler"
 )
 
 type ManagerStorage interface {
@@ -13,19 +14,21 @@ type ManagerStorage interface {
 	RemoveManager(ctx context.Context, managerID uuid.UUID) error
 }
 
-type ManagerServiceImpl struct {
+type _ handler.ManagerService
+
+type managerService struct {
 	managerStorage ManagerStorage
 	validate       *validator.Validate
 }
 
-func NewManagerServiceImpl(managerStorage ManagerStorage, validate *validator.Validate) *ManagerServiceImpl {
-	return &ManagerServiceImpl{
+func NewManagerService(managerStorage ManagerStorage, validate *validator.Validate) handler.ManagerService {
+	return &managerService{
 		managerStorage: managerStorage,
 		validate:       validate,
 	}
 }
 
-func (m *ManagerServiceImpl) AddManager(ctx context.Context, manager domain.Manager) (uuid.UUID, error) {
+func (m *managerService) AddManager(ctx context.Context, manager domain.Manager) (uuid.UUID, error) {
 	manager.ID = uuid.New()
 	if err := m.validate.Struct(manager); err != nil {
 		return uuid.Nil, err
@@ -33,6 +36,6 @@ func (m *ManagerServiceImpl) AddManager(ctx context.Context, manager domain.Mana
 	return m.managerStorage.AddManager(ctx, manager)
 }
 
-func (m *ManagerServiceImpl) RemoveManager(ctx context.Context, managerID uuid.UUID) error {
+func (m *managerService) RemoveManager(ctx context.Context, managerID uuid.UUID) error {
 	return m.managerStorage.RemoveManager(ctx, managerID)
 }

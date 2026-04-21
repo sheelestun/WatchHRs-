@@ -6,6 +6,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/sheelestun/WatchHRs-/internal/domain"
+	"github.com/sheelestun/WatchHRs-/internal/web/handler"
 )
 
 type EmployeeStorage interface {
@@ -14,12 +15,14 @@ type EmployeeStorage interface {
 	RemoveEmployee(ctx context.Context, employeeID uuid.UUID) error
 }
 
+type _ handler.EmployeeService
+
 type employeeService struct {
 	employeeStorage EmployeeStorage
 	validate        *validator.Validate
 }
 
-func NewEmployeeService(employeeStorage EmployeeStorage, validate *validator.Validate) EmployeeService {
+func NewEmployeeService(employeeStorage EmployeeStorage, validate *validator.Validate) handler.EmployeeService {
 	return &employeeService{
 		employeeStorage: employeeStorage,
 		validate:        validate,

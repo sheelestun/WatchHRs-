@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/sheelestun/WatchHRs-/internal/web/handler"
 )
 
 type AuthStorage interface {
@@ -17,12 +18,14 @@ type AuthCache interface {
 	DeleteTokenInCache(ctx context.Context, tokenID string) error
 }
 
+type _ handler.AuthService
+
 type authService struct {
 	authStorage AuthStorage
 	cache       AuthCache
 }
 
-func NewAuthService(authStorage AuthStorage, cache AuthCache) AuthService {
+func NewAuthService(authStorage AuthStorage, cache AuthCache) handler.AuthService {
 	return &authService{
 		authStorage: authStorage,
 		cache:       cache,
