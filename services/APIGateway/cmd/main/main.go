@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/sheelestun/WatchHRs-/internal/config"
-	"github.com/sheelestun/WatchHRs-/internal/postgres"
+	"github.com/sheelestun/WatchHRs-/internal/database"
 	"github.com/sheelestun/WatchHRs-/internal/redis"
 	"github.com/sheelestun/WatchHRs-/internal/repository"
 	"github.com/sheelestun/WatchHRs-/internal/service"
@@ -28,7 +28,7 @@ func main() {
 	initLogger(&cfg.Logger)
 
 	// Подключение к базе данных
-	db, err := postgres.Connect(&cfg.Database)
+	db, err := database.Connect(&cfg.Database)
 	if err != nil {
 		log.WithError(err).Fatal("Failed to connect to database")
 	}
