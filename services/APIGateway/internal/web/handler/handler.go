@@ -13,27 +13,27 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/google/uuid"
-	"github.com/sheelestun/WatchHRs-/internal/entity"
+	"github.com/sheelestun/WatchHRs-/internal/domain"
 )
 
 type ApiService interface {
 	Auth(ctx context.Context, userId uuid.UUID) (string, error)
 
-	AddManager(ctx context.Context, manager entity.Manager) (uuid.UUID, error)
+	AddManager(ctx context.Context, manager domain.Manager) (uuid.UUID, error)
 	RemoveManager(ctx context.Context, managerID uuid.UUID) error
 
-	AddEmployee(ctx context.Context, employee entity.Employee) (uuid.UUID, error)
-	GetEmployeesByManagerID(ctx context.Context, managerID uuid.UUID) ([]entity.Employee, error)
+	AddEmployee(ctx context.Context, employee domain.Employee) (uuid.UUID, error)
+	GetEmployeesByManagerID(ctx context.Context, managerID uuid.UUID) ([]domain.Employee, error)
 	RemoveEmployee(ctx context.Context, employeeID uuid.UUID) error
 
-	AddPhoto(ctx context.Context, photo entity.Photo) (uuid.UUID, error)
+	AddPhoto(ctx context.Context, photo domain.Photo) (uuid.UUID, error)
 
-	AddScreenshotStatistic(ctx context.Context, screenshot entity.ScreenshotStatistic) (uuid.UUID, error)
-	GetScreenshotsStatistic(ctx context.Context, employeeID uuid.UUID, date time.Time) ([]entity.ScreenshotStatistic, error)
+	AddScreenshotStatistic(ctx context.Context, screenshot domain.ScreenshotStatistic) (uuid.UUID, error)
+	GetScreenshotsStatistic(ctx context.Context, employeeID uuid.UUID, date time.Time) ([]domain.ScreenshotStatistic, error)
 
 	StartWorkSession(ctx context.Context, employeeID uuid.UUID) (uuid.UUID, error)
 	StopWorkSession(ctx context.Context, employeeID uuid.UUID) (uuid.UUID, error)
-	GetWorkSessions(ctx context.Context, employeeID uuid.UUID, date time.Time) ([]entity.WorkSession, error)
+	GetWorkSessions(ctx context.Context, employeeID uuid.UUID, date time.Time) ([]domain.WorkSession, error)
 
 	SaveToken(ctx context.Context, tokenID, userID string, expiresAt time.Time) error
 	ExistsToken(ctx context.Context, tokenID string) (bool, error)
@@ -316,7 +316,7 @@ func (handler *ApiHandler) AddScreenshotStatisticHandler(w http.ResponseWriter, 
 		return
 	}
 
-	var screenshotStatistic entity.ScreenshotStatistic
+	var screenshotStatistic domain.ScreenshotStatistic
 	if err = json.NewDecoder(r.Body).Decode(&screenshotStatistic); err != nil {
 		http.Error(w, "invalid json body", http.StatusBadRequest)
 		log.Error(err)
@@ -367,7 +367,7 @@ func (handler *ApiHandler) GetScreenshotsStatisticHandler(w http.ResponseWriter,
 	}
 
 	type StatisticResponse struct {
-		Screenshots []entity.ScreenshotStatistic `json:"screenshots"`
+		Screenshots []domain.ScreenshotStatistic `json:"screenshots"`
 	}
 	statisticResponse := StatisticResponse{screenshots}
 	if err := json.NewEncoder(w).Encode(statisticResponse); err != nil {
@@ -457,7 +457,7 @@ func (handler *ApiHandler) GetWorkSessionsHandler(w http.ResponseWriter, r *http
 	}
 
 	type SessionResponse struct {
-		WorkSessions []entity.WorkSession `json:"workSessions"`
+		WorkSessions []domain.WorkSession `json:"workSessions"`
 	}
 	sessionResponse := SessionResponse{sessions}
 	if err := json.NewEncoder(w).Encode(sessionResponse); err != nil {
@@ -468,7 +468,7 @@ func (handler *ApiHandler) GetWorkSessionsHandler(w http.ResponseWriter, r *http
 }
 
 func (handler *ApiHandler) AddEmployeeInfoHandler(w http.ResponseWriter, r *http.Request) {
-	var newEmployee entity.Employee
+	var newEmployee domain.Employee
 	if err := json.NewDecoder(r.Body).Decode(&newEmployee); err != nil {
 		http.Error(w, "invalid json body", http.StatusBadRequest)
 		log.Error(err)
@@ -494,7 +494,7 @@ func (handler *ApiHandler) AddEmployeeInfoHandler(w http.ResponseWriter, r *http
 }
 
 func (handler *ApiHandler) AddManagerInfoHandler(w http.ResponseWriter, r *http.Request) {
-	var newManager entity.Manager
+	var newManager domain.Manager
 	if err := json.NewDecoder(r.Body).Decode(&newManager); err != nil {
 		http.Error(w, "invalid json body", http.StatusBadRequest)
 		log.Error(err)
