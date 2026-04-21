@@ -1,7 +1,7 @@
 # WatchHRs-
 
 ```
-WatchHRs/services
+WatchHRs/
 |   readme.md
 |   services/web/
 |   services/desktop/
