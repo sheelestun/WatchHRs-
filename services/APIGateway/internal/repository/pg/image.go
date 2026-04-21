@@ -8,7 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (p *PostgresRepository) AddPhoto(ctx context.Context, photo domain.Image) (uuid.UUID, error) {
+func (p *PostgresRepository) AddImage(ctx context.Context, photo domain.Image) (uuid.UUID, error) {
 	query := `
 		INSERT INTO photos (id, user_id)
 		VALUES ($1, $2)
