@@ -1,11 +1,11 @@
 # WatchHRs-
 
 ```
-WatchHRs
+WatchHRs/services
 |   readme.md
-|   web/
-|   desktop/
-|   backend/
+|   services/web/
+|   services/desktop/
+|   services/API Gateway/
 ```
 
 # Workflow
