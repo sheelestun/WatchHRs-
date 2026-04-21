@@ -19,7 +19,7 @@ type employeeService struct {
 	validate        *validator.Validate
 }
 
-func NewEmployeeService(employeeStorage EmployeeStorage, validate *validator.Validate) *EmployeeServiceImpl {
+func NewEmployeeService(employeeStorage EmployeeStorage, validate *validator.Validate) EmployeeService {
 	return &employeeService{
 		employeeStorage: employeeStorage,
 		validate:        validate,

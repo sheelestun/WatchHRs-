@@ -19,7 +19,7 @@ type refreshToken struct {
 type InMemoryStorage struct {
 	managers     map[uuid.UUID]*domain.Manager
 	employees    map[uuid.UUID]*domain.Employee
-	photos       map[uuid.UUID]*domain.Photo
+	photos       map[uuid.UUID]*domain.Image
 	screenshots  map[uuid.UUID][]*domain.ScreenshotStatistic
 	workSessions map[uuid.UUID][]*domain.WorkSession
 
@@ -30,7 +30,7 @@ func NewInMemoryStorage() *InMemoryStorage {
 	return &InMemoryStorage{
 		managers:      make(map[uuid.UUID]*domain.Manager),
 		employees:     make(map[uuid.UUID]*domain.Employee),
-		photos:        make(map[uuid.UUID]*domain.Photo),
+		photos:        make(map[uuid.UUID]*domain.Image),
 		screenshots:   make(map[uuid.UUID][]*domain.ScreenshotStatistic),
 		workSessions:  make(map[uuid.UUID][]*domain.WorkSession),
 		refreshTokens: make(map[string]refreshToken),
@@ -96,7 +96,7 @@ func (i *InMemoryStorage) RemoveEmployee(ctx context.Context, employeeID uuid.UU
 	return nil
 }
 
-func (i *InMemoryStorage) AddPhoto(ctx context.Context, photo domain.Photo) (uuid.UUID, error) {
+func (i *InMemoryStorage) AddPhoto(ctx context.Context, photo domain.Image) (uuid.UUID, error) {
 	i.photos[photo.ID] = &photo
 	log.Debugf("Added photo: %+v", photo)
 	return photo.ID, nil

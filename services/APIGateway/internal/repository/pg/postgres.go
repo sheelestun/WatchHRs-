@@ -109,7 +109,7 @@ func (p *PgRepository) RemoveEmployee(ctx context.Context, employeeID uuid.UUID)
 
 }
 
-func (p *PgRepository) AddPhoto(ctx context.Context, photo domain.Photo) (uuid.UUID, error) {
+func (p *PgRepository) AddPhoto(ctx context.Context, photo domain.Image) (uuid.UUID, error) {
 	query := `
 		INSERT INTO photos (id, user_id)
 		VALUES ($1, $2)

@@ -1,4 +1,4 @@
-package handler
+package middleware
 
 import (
 	"context"
@@ -9,8 +9,15 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/sheelestun/WatchHRs-/internal/web/handler"
 	log "github.com/sirupsen/logrus"
 )
+
+type AuthService interface {
+}
+
+type Jwt struct {
+}
 
 type AccessClaims struct {
 	UserID string `json:"user_id"`
@@ -24,7 +31,7 @@ type RefreshClaims struct {
 	jwt.RegisteredClaims
 }
 
-func (handler *ApiHandler) generateTokens(userID, role string) (string, string, error) {
+func (handler *handler.ApiHandler) generateTokens(userID, role string) (string, string, error) {
 	now := time.Now()
 
 	// Access Token
@@ -72,7 +79,7 @@ func (handler *ApiHandler) generateTokens(userID, role string) (string, string, 
 
 type claimsKey struct{}
 
-func (handler *ApiHandler) JWTMiddleware(next http.Handler) http.Handler {
+func (handler *handler.ApiHandler) JWTMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		tokenStr, err := extractAccessToken(r)
@@ -93,7 +100,7 @@ func (handler *ApiHandler) JWTMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func (handler *ApiHandler) parseRefreshToken(tokenStr string) (*RefreshClaims, error) {
+func (handler *handler.ApiHandler) parseRefreshToken(tokenStr string) (*RefreshClaims, error) {
 	token, err := jwt.ParseWithClaims(
 		tokenStr,
 		&RefreshClaims{},
@@ -125,7 +132,7 @@ func (handler *ApiHandler) parseRefreshToken(tokenStr string) (*RefreshClaims, e
 	return claims, nil
 }
 
-func (handler *ApiHandler) parseToken(tokenStr string) (*AccessClaims, error) {
+func (handler *handler.ApiHandler) parseToken(tokenStr string) (*AccessClaims, error) {
 	token, err := jwt.ParseWithClaims(
 		tokenStr,
 		&AccessClaims{},

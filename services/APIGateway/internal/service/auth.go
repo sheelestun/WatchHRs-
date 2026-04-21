@@ -17,30 +17,30 @@ type AuthCache interface {
 	DeleteTokenInCache(ctx context.Context, tokenID string) error
 }
 
-type AuthServiceImpl struct {
+type authService struct {
 	authStorage AuthStorage
 	cache       AuthCache
 }
 
-func NewAuthService(authStorage AuthStorage, cache AuthCache) *AuthServiceImpl {
-	return &AuthServiceImpl{
+func NewAuthService(authStorage AuthStorage, cache AuthCache) AuthService {
+	return &authService{
 		authStorage: authStorage,
 		cache:       cache,
 	}
 }
 
-func (a *AuthServiceImpl) Auth(ctx context.Context, userId uuid.UUID) (string, error) {
+func (a *authService) Auth(ctx context.Context, userId uuid.UUID) (string, error) {
 	return a.authStorage.FindUser(ctx, userId)
 }
 
-func (a *AuthServiceImpl) DeleteToken(ctx context.Context, tokenID string) error {
+func (a *authService) DeleteToken(ctx context.Context, tokenID string) error {
 	return a.cache.DeleteTokenInCache(ctx, tokenID)
 }
 
-func (a *AuthServiceImpl) ExistsToken(ctx context.Context, tokenID string) (bool, error) {
+func (a *authService) ExistsToken(ctx context.Context, tokenID string) (bool, error) {
 	return a.cache.ExistsTokenInCache(ctx, tokenID)
 }
 
-func (a *AuthServiceImpl) SaveToken(ctx context.Context, tokenID, userID string, expiresAt time.Time) error {
+func (a *authService) SaveToken(ctx context.Context, tokenID, userID string, expiresAt time.Time) error {
 	return a.cache.SaveTokenInCache(ctx, tokenID, userID, expiresAt)
 }

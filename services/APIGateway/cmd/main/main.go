@@ -10,10 +10,12 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/sheelestun/WatchHRs-/internal/config"
 	"github.com/sheelestun/WatchHRs-/internal/database"
 	"github.com/sheelestun/WatchHRs-/internal/redis"
-	"github.com/sheelestun/WatchHRs-/internal/repository"
+	"github.com/sheelestun/WatchHRs-/internal/repository/pg"
+	redis2 "github.com/sheelestun/WatchHRs-/internal/repository/redis"
 	"github.com/sheelestun/WatchHRs-/internal/service"
 	"github.com/sheelestun/WatchHRs-/internal/web/handler"
 	"github.com/sheelestun/WatchHRs-/internal/web/router"
@@ -41,11 +43,29 @@ func main() {
 	}
 	defer redisClient.Close()
 
-	pgRepository := repository.NewPgRepository(db)
-	redisCache := repository.NewRedisCache(redisClient)
-	apiService := service.NewAPIService(pgRepository, redisCache)
-	hand := handler.NewApiHandler(apiService, cfg.SecretKey)
-	r := router.NewRouter(hand)
+	pgRepository := pg.NewPgRepository(db)
+	redisCache := redis2.NewRedisCache(redisClient)
+
+	// Инициализация валидатора
+	validate := validator.New()
+
+	//Инициализация сервисов
+	authService := service.NewAuthService(pgRepository, redisCache)
+	employeeService := service.NewEmployeeService(pgRepository, validate)
+	imageService := service.NewImageService(pgRepository, validate)
+	managerService := service.NewManagerService(pgRepository, validate)
+	screenshotStatsService := service.NewScreenshotStatisticService(pgRepository, validate)
+	workSessionService := service.NewWorkSessionService(pgRepository, validate)
+
+	// Инициализация хендлеров
+	authHandler := handler.NewAuthHandler(authService, cfg.SecretKey)
+	employeeHandler := handler.NewEmployeeHandler(employeeService)
+	imageHandler := handler.NewImageHandler(imageService)
+	managerHandler := handler.NewManagerHandler(managerService)
+	screenshotStatsHandler := handler.NewScreenshotStatisticHandler(screenshotStatsService)
+	workSessionHandler := handler.NewWorkSessionHandler(workSessionService)
+
+	r := router.NewRouter()
 
 	// Создание HTTP сервера
 	server := &http.Server{
