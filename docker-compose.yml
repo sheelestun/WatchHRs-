@@ -1,30 +1,30 @@
 version: "3.9"
 
 services:
-  gateway:
-    build: .
-    container_name: watch_hrs_gateway
+  api_gateway:
+    build:
+      context: ./services/APIGateway
+      dockerfile: docker/Dockerfile
+    container_name: watch_hrs_api_gateway
     restart: unless-stopped
     env_file:
-      - .env
+      - ./services/APIGateway/.env
     ports:
-      - "${SERVER_PORT}:${SERVER_PORT}"
+      - "8080:8080"
     depends_on:
       - postgres
       - redis
-    networks:
-      - watch_hrs_network
 
   postgres:
     image: postgres:16-alpine
     container_name: watch_hrs_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: api_gateway_user
+      POSTGRES_PASSWORD: api_gateway_pass
+      POSTGRES_DB: watch_hrs
     ports:
-      - "${DB_PORT}:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -32,9 +32,8 @@ services:
     image: redis:7-alpine
     container_name: watch_hrs_redis
     restart: unless-stopped
-    command: redis-server --requirepass ${REDIS_PASSWORD}
     ports:
-      - "${REDIS_PORT}:6379"
+      - "6379:6379"
     volumes:
       - redis_data:/data
 

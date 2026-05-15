@@ -36,6 +36,22 @@ func main() {
 	}
 	defer db.Close()
 
+	// Миграция базы данных
+	if err := database.RunMigrations(
+		"file://migrations",
+		fmt.Sprintf(
+			"postgres://%s:%s@%s:%s/%s?sslmode=%s",
+			cfg.Database.User,
+			cfg.Database.Password,
+			cfg.Database.Host,
+			cfg.Database.Port,
+			cfg.Database.DBName,
+			cfg.Database.SSLMode,
+		),
+	); err != nil {
+		log.WithError(err).Fatal("Failed to run migrations")
+	}
+
 	// Подключение к Redis
 	redisClient, err := redis.Connect(&cfg.Redis)
 	if err != nil {
@@ -65,7 +81,7 @@ func main() {
 	screenshotStatsHandler := handler.NewScreenshotStatisticHandler(screenshotStatsService)
 	workSessionHandler := handler.NewWorkSessionHandler(workSessionService)
 
-	r := router.NewRouter()
+	r := router.NewRouter(authHandler, employeeHandler, imageHandler, managerHandler, screenshotStatsHandler, workSessionHandler)
 
 	// Создание HTTP сервера
 	server := &http.Server{

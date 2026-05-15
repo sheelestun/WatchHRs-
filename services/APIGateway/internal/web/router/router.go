@@ -8,9 +8,9 @@ import (
 	"github.com/sheelestun/WatchHRs-/internal/web/handler"
 )
 
-func NewRouter(authHandler handler.AuthHandler, employeeHandler handler.EmployeeHandler,
-	imageHandler handler.ImageHandler, managerHandler handler.ManagerHandler,
-	statisticHandler handler.ScreenshotStatisticHandler, sessionHandler handler.WorkSessionHandler) *chi.Mux {
+func NewRouter(authHandler *handler.AuthHandler, employeeHandler *handler.EmployeeHandler,
+	imageHandler *handler.ImageHandler, managerHandler *handler.ManagerHandler,
+	statisticHandler *handler.ScreenshotStatisticHandler, sessionHandler *handler.WorkSessionHandler) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
