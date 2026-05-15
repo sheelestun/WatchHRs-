@@ -9,11 +9,16 @@ import (
 )
 
 type Config struct {
-	Server    ServerConfig   `json:"server"`
-	Database  DatabaseConfig `json:"database"`
-	Redis     RedisConfig    `json:"redis"`
-	Logger    LoggerConfig   `json:"logger"`
-	SecretKey []byte         `json:"secret_key"`
+	Server         ServerConfig         `json:"server"`
+	Database       DatabaseConfig       `json:"database"`
+	Redis          RedisConfig          `json:"redis"`
+	Logger         LoggerConfig         `json:"logger"`
+	CVImageStorage CVImageStorageConfig `json:"cv_image_storage"`
+	SecretKey      []byte               `json:"secret_key"`
+}
+
+type CVImageStorageConfig struct {
+	BaseURL string `json:"base_url"`
 }
 
 type ServerConfig struct {
@@ -48,7 +53,7 @@ type LoggerConfig struct {
 // Load загружает конфигурацию из переменных окружения
 func Load() *Config {
 	if err := godotenv.Load(); err != nil {
-		log.Error("Error loading .env file")
+		log.Debug("No .env file loaded, using environment variables")
 	}
 
 	return &Config{
@@ -76,6 +81,9 @@ func Load() *Config {
 			Level:  getEnv("LOG_LEVEL", "info"),
 			Format: getEnv("LOG_FORMAT", "json"),
 			File:   getEnv("LOG_FILE", ""),
+		},
+		CVImageStorage: CVImageStorageConfig{
+			BaseURL: getEnv("CV_IMAGE_STORAGE_URL", "http://localhost:8081"),
 		},
 		SecretKey: []byte(getEnv("SECRET_KEY", "just-big-secret-key-asdsakmsmbmdlv")),
 	}

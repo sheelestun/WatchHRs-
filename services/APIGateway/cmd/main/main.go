@@ -7,10 +7,12 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/sheelestun/WatchHRs-/internal/client/cvimage"
 	"github.com/sheelestun/WatchHRs-/internal/config"
 	"github.com/sheelestun/WatchHRs-/internal/database"
 	"github.com/sheelestun/WatchHRs-/internal/redis"
@@ -36,9 +38,14 @@ func main() {
 	}
 	defer db.Close()
 
+	migrationsPath, err := filepath.Abs("migrations")
+	if err != nil {
+		log.WithError(err).Fatal("Failed to resolve migrations path")
+	}
+
 	// Миграция базы данных
 	if err := database.RunMigrations(
-		"file://migrations",
+		"file://"+filepath.ToSlash(migrationsPath),
 		fmt.Sprintf(
 			"postgres://%s:%s@%s:%s/%s?sslmode=%s",
 			cfg.Database.User,
@@ -68,15 +75,16 @@ func main() {
 	//Инициализация сервисов
 	authService := service.NewAuthService(pgRepository, redisCache)
 	employeeService := service.NewEmployeeService(pgRepository, validate)
-	imageService := service.NewImageService(pgRepository, validate)
 	managerService := service.NewManagerService(pgRepository, validate)
 	screenshotStatsService := service.NewScreenshotStatisticService(pgRepository, validate)
 	workSessionService := service.NewWorkSessionService(pgRepository, validate)
 
+	cvClient := cvimage.NewClient(cfg.CVImageStorage.BaseURL)
+
 	// Инициализация хендлеров
-	authHandler := handler.NewAuthHandler(authService, cfg.SecretKey)
-	employeeHandler := handler.NewEmployeeHandler(employeeService)
-	imageHandler := handler.NewImageHandler(imageService)
+	authHandler := handler.NewAuthHandler(authService, cvClient, cfg.SecretKey)
+	employeeHandler := handler.NewEmployeeHandler(employeeService, cvClient)
+	imageHandler := handler.NewImageHandler(cvClient)
 	managerHandler := handler.NewManagerHandler(managerService)
 	screenshotStatsHandler := handler.NewScreenshotStatisticHandler(screenshotStatsService)
 	workSessionHandler := handler.NewWorkSessionHandler(workSessionService)

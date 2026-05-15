@@ -177,6 +177,14 @@ func extractRefreshToken(r *http.Request) (string, error) {
 	return cookie.Value, nil
 }
 
+func UserIDFromContext(ctx context.Context) (string, bool) {
+	claims, ok := ctx.Value(claimsKey{}).(*AccessClaims)
+	if !ok || claims == nil {
+		return "", false
+	}
+	return claims.UserID, true
+}
+
 func RequireRole(role string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

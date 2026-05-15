@@ -14,6 +14,19 @@ services:
     depends_on:
       - postgres
       - redis
+      - cv_image_storage
+
+  cv_image_storage:
+    build:
+      context: ./services/CVImageStorage
+      dockerfile: Dockerfile
+    container_name: watch_hrs_cv_image_storage
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    volumes:
+      - cv_storage_data:/data/storage
+
 
   postgres:
     image: postgres:16-alpine
@@ -40,3 +53,4 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  cv_storage_data:

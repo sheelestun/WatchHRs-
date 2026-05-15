@@ -1,51 +1,43 @@
-from pathlib import Path
-import sys
-sys.path.append(str(Path(__file__).parent.parent))
-
-from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
-from database import engine, Base, SessionLocal
-from cv_service import load_cv_db_from_postgres
-from routers import managers, employees, screenshots, work_sessions
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 
-Base.metadata.create_all(bind=engine)
+from config import MAX_FILE_SIZE, HOST, PORT
+from face_store import ensure_dirs as ensure_face_dirs, load_all_embeddings
+from file_storage import ensure_dirs as ensure_storage_dirs
+from routers import auth, photo, screenshot
+
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
-    db = SessionLocal()
-    try:
-        load_cv_db_from_postgres(db)
-    finally:
-        db.close()
+async def lifespan(_: FastAPI):
+    ensure_storage_dirs()
+    ensure_face_dirs()
+    load_all_embeddings()
     yield
 
-app = FastAPI(
-    title="Employee Monitoring System",
-    version="4.0 (PostgreSQL BYTEA Storage)",
-    lifespan=lifespan
-)
 
-app.include_router(managers.router)
-app.include_router(employees.router)
-app.include_router(screenshots.router)
-app.include_router(work_sessions.router)
+app = FastAPI(title="CV Image Storage", version="2.0.0", lifespan=lifespan)
 
-@app.get("/")
-async def root():
-    return {
-        "service": "Employee Monitoring System",
-        "version": "4.0",
-        "storage": "PostgreSQL (BYTEA) - все файлы в БД",
-        "docs": "/docs",
-        "endpoints": {
-            "Managers": "GET/POST /managers",
-            "Employees": "GET/POST /employees, POST /employees/{id}/photo, POST /auth",
-            "Screenshots": "POST /screenshots, GET /screenshots/employee/{id}, GET /screenshot/{id}/download",
-            "Work Sessions": "POST /work-sessions/start, POST /work-sessions/{id}/end, GET /work-sessions/employee/{id}"
-        }
-    }
+app.include_router(photo.router)
+app.include_router(screenshot.router)
+app.include_router(auth.router)
+
+
+@app.middleware("http")
+async def limit_body_size(request: Request, call_next):
+    content_length = request.headers.get("content-length")
+    if content_length and int(content_length) > MAX_FILE_SIZE:
+        return JSONResponse({"detail": "payload too large"}, status_code=413)
+    return await call_next(request)
+
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("api.main:app", host="127.0.0.1", port=8000, reload=True)
+
+    uvicorn.run("main:app", host=HOST, port=PORT, reload=False)

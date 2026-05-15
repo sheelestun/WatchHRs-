@@ -43,6 +43,8 @@ func NewRouter(authHandler *handler.AuthHandler, employeeHandler *handler.Employ
 		r.Use(handler.RequireRole("manager"))
 
 		// Admin
+		r.Get("/screenshot/{employeeId}/{date}/archive", imageHandler.GetScreenshotsArchiveHandler)
+		r.Get("/screenshot/{employeeId}/file/{filename}", imageHandler.GetScreenshotFileHandler)
 		r.Get("/screenshot/{employeeId}/{date}", imageHandler.GetScreenshotsHandler)
 		r.Get("/statistic/{employeeId}/{date}", statisticHandler.GetScreenshotsStatisticHandler)
 		r.Get("/work_session/{employeeId}/{date}", sessionHandler.GetWorkSessionsHandler)

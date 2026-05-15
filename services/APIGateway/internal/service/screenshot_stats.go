@@ -7,6 +7,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/sheelestun/WatchHRs-/internal/domain"
+	"github.com/sheelestun/WatchHRs-/internal/web/handler"
 )
 
 type ScreenshotStatisticStorage interface {
@@ -14,12 +15,14 @@ type ScreenshotStatisticStorage interface {
 	GetScreenshotsStatistic(ctx context.Context, employeeID uuid.UUID, date time.Time) ([]domain.ScreenshotStatistic, error)
 }
 
+type _ handler.ScreenshotStatisticService
+
 type screenshotStatisticService struct {
 	screenshotStatisticStorage ScreenshotStatisticStorage
 	validate                   *validator.Validate
 }
 
-func NewScreenshotStatisticService(ScreenshotStatisticStorage ScreenshotStatisticStorage, validate *validator.Validate) ScreenshotStatisticService {
+func NewScreenshotStatisticService(ScreenshotStatisticStorage ScreenshotStatisticStorage, validate *validator.Validate) handler.ScreenshotStatisticService {
 	return &screenshotStatisticService{screenshotStatisticStorage: ScreenshotStatisticStorage, validate: validate}
 }
 

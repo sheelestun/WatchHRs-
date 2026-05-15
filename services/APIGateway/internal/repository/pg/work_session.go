@@ -51,7 +51,7 @@ func (p *PostgresRepository) StopWorkSession(ctx context.Context, employeeID uui
 
 func (p *PostgresRepository) GetWorkSessions(ctx context.Context, employeeID uuid.UUID, date time.Time) ([]domain.WorkSession, error) {
 	query := `
-		SELECT id, employeeI_id, start_time, end_time, total_time
+		SELECT id, employee_id, start_time, end_time, total_time
 		FROM work_sessions
 		WHERE employee_id = $1
 		AND start_time >= $2

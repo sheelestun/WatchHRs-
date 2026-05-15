@@ -7,6 +7,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/sheelestun/WatchHRs-/internal/domain"
+	"github.com/sheelestun/WatchHRs-/internal/web/handler"
 )
 
 type WorkSessionStorage interface {
@@ -15,12 +16,14 @@ type WorkSessionStorage interface {
 	GetWorkSessions(ctx context.Context, employeeID uuid.UUID, date time.Time) ([]domain.WorkSession, error)
 }
 
+type _ handler.WorkSessionService
+
 type workSessionService struct {
 	workSessionStorage WorkSessionStorage
 	validate           *validator.Validate
 }
 
-func NewWorkSessionService(WorkSessionStorage WorkSessionStorage, validate *validator.Validate) WorkSessionService {
+func NewWorkSessionService(WorkSessionStorage WorkSessionStorage, validate *validator.Validate) handler.WorkSessionService {
 	return &workSessionService{workSessionStorage: WorkSessionStorage, validate: validate}
 }
 

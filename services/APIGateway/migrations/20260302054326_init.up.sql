@@ -1,5 +1,3 @@
--- +goose Up
-
 CREATE TABLE IF NOT EXISTS managers (
     id UUID PRIMARY KEY,
     name VARCHAR(32) NOT NULL,
@@ -37,11 +35,3 @@ CREATE TABLE IF NOT EXISTS work_sessions (
 CREATE UNIQUE INDEX uniq_active_session
     ON work_sessions(employee_id)
     WHERE end_time IS NULL;
-
--- +goose Down
-
-DROP TABLE IF EXISTS work_sessions;
-DROP TABLE IF EXISTS screenshot_statistics;
-DROP TABLE IF EXISTS photos;
-DROP TABLE IF EXISTS employees;
-DROP TABLE IF EXISTS managers;
