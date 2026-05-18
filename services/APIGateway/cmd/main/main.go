@@ -79,6 +79,8 @@ func main() {
 	screenshotStatsService := service.NewScreenshotStatisticService(pgRepository, validate)
 	workSessionService := service.NewWorkSessionService(pgRepository, validate)
 
+
+	// Инициализация cv Клиента
 	cvClient := cvimage.NewClient(cfg.CVImageStorage.BaseURL)
 
 	// Инициализация хендлеров
