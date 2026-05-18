@@ -43,7 +43,7 @@ func main() {
 		log.WithError(err).Fatal("Failed to resolve migrations path")
 	}
 
-	// Миграция базы данных
+	// Миграция
 	if err := database.RunMigrations(
 		"file://"+filepath.ToSlash(migrationsPath),
 		fmt.Sprintf(
