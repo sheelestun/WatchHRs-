@@ -67,6 +67,12 @@ MANIFEST
 *.manifest
 *.spec
 
+# WatchHRs Desktop local data
+WatchHRs-/desktop/screenshots/*.png
+!WatchHRs-/desktop/screenshots/.gitkeep
+WatchHRs-/desktop/dist/
+WatchHRs-/desktop/build/
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
