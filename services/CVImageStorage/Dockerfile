@@ -10,9 +10,9 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY storage+recognition ./storage+recognition
+COPY storage+recognition/api ./api
 
-WORKDIR /app/storage+recognition/api
+WORKDIR /app/api
 
 ENV STORAGE_ROOT=/data/storage
 ENV HOST=0.0.0.0
