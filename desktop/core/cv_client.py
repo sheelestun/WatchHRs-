@@ -20,17 +20,26 @@ class CVStorageClient:
             if not success:
                 return None
 
-            files = {'photo': ('employee.jpg', buffer.tobytes(), 'image/jpeg')}
+            files = {'photo': ('employee.jpg', buffer.tobytes(), 'image/jpeg')} #from desktop-add
+            #from develop files = {'file': ('employee.jpg', buffer.tobytes(), 'image/jpeg')}
+            
             response = requests.post(
                 f"{self.api_url}/auth",
                 files=files,
                 timeout=10
             )
 
+            # from desktop-add
             print(f"🔍 Auth response: {response.status_code} {response.text[:300]}")
             if response.status_code == 200:
                 data = response.json()
                 return data.get('userID')
+
+            ## from develop
+            #print(f"🔍 Auth response: {response.status_code} {response.text[:300]}")
+            #if response.status_code == 200:
+            #    data = response.json()
+            #    return data.get('employeeId')
 
             return None
 

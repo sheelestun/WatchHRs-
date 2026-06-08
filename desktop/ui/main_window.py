@@ -15,6 +15,7 @@ class MainWindow:
         self.root.geometry("400x450")
         
         self.test_mode = test_mode
+
         self.client = CVStorageClient(api_url="https://watchhrs.gehrman.me/api")
         self.employee_id = None
         
@@ -97,6 +98,9 @@ class MainWindow:
     def _update_video_frame(self, frame):
         img = Image.fromarray(frame)
         img = img.resize((320, 240), Image.Resampling.LANCZOS)
+        self.root.after(0, self._set_video_frame, img)
+
+    def _set_video_frame(self, img):
         photo = ImageTk.PhotoImage(img)
         self.video_label.img = photo
         self.video_label.config(image=photo)

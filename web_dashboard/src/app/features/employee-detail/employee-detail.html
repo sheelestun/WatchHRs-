@@ -88,7 +88,7 @@
             </button>
           </div>
           <div class="screenshots-grid">
-            @for (shot of screenshots(); track shot.id) {
+            @for (shot of screenshots(); track shot.filename) {
               <div class="screenshot-card mat-elevation-z1">
                 @if (screenshotUrls()[shot.filename]) {
                   <img [src]="screenshotUrls()[shot.filename]" [alt]="shot.filename" />
@@ -96,8 +96,7 @@
                   <div class="img-placeholder"><mat-spinner diameter="32" /></div>
                 }
                 <div class="screenshot-meta">
-                  <span>{{ formatTime(shot.timestamp) }}</span>
-                  <span>🖱 {{ shot.cnt_mouse_clicks }} &nbsp; ⌨ {{ shot.cnt_keyboard_clicks }}</span>
+                  <span>{{ shot.filename }}</span>
                 </div>
               </div>
             }
