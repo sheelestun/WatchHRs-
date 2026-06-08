@@ -15,7 +15,8 @@ class MainWindow:
         self.root.geometry("400x450")
         
         self.test_mode = test_mode
-        self.client = CVStorageClient(api_url="http://localhost:8080")
+        # self.client = CVStorageClient(api_url="http://localhost:8080")
+        self.client = CVStorageClient(api_url="https://watchhrs.gehrman.me/api/")
         self.employee_id = None
         
         # Инициализируем монитор с коллбэком для отправки данных каждые 10 мин
