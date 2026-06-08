@@ -29,7 +29,7 @@ func (p *PostgresRepository) GetAllEmployeesByManagerID(ctx context.Context, man
 	query := `
 		SELECT id, name, email, manager_id
 		FROM employees
-		WHERE managerID = $1;
+		WHERE manager_id = $1;
 	`
 
 	err := p.db.SelectContext(ctx, &employees, query, managerID)
