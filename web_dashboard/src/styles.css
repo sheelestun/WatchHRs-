@@ -1,1 +1,216 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global styles */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  background-color: #f5f5f5;
+}
+
+/* ─── Layout helpers ─── */
+.spacer {
+  flex: 1 1 auto;
+}
+
+.toolbar-title {
+  margin-left: 8px;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.page-content {
+  max-width: 1100px;
+  margin: 32px auto;
+  padding: 0 24px;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.page-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+/* ─── Login ─── */
+.login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 16px;
+}
+
+/* ─── Employee form ─── */
+.form-page {
+  display: flex;
+  justify-content: center;
+}
+
+.form-card {
+  width: 100%;
+  max-width: 520px;
+  padding: 8px;
+}
+
+/* ─── Full-width field ─── */
+.full-width {
+  width: 100%;
+  margin-top: 16px;
+}
+
+/* ─── Error / hint text ─── */
+.error-msg {
+  color: #d32f2f;
+  font-size: 0.875rem;
+  margin: 8px 0 0;
+}
+
+/* ─── Loading spinner center ─── */
+.loading-center {
+  display: flex;
+  justify-content: center;
+  padding: 48px 0;
+}
+
+/* ─── Empty state ─── */
+.empty-state {
+  text-align: center;
+  padding: 64px 24px;
+  color: #666;
+}
+
+.empty-state mat-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  opacity: 0.3;
+  display: block;
+  margin: 0 auto 16px;
+}
+
+.empty-msg {
+  color: #888;
+  text-align: center;
+  padding: 32px 0;
+}
+
+/* ─── Dashboard table ─── */
+.employees-table {
+  width: 100%;
+}
+
+.actions-cell {
+  white-space: nowrap;
+  text-align: right;
+}
+
+.clickable-row {
+  cursor: pointer;
+}
+
+.clickable-row:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* ─── Employee detail ─── */
+.date-row {
+  margin-bottom: 16px;
+}
+
+.date-field {
+  min-width: 200px;
+}
+
+.tab-content {
+  padding: 24px 0;
+}
+
+.data-table {
+  width: 100%;
+}
+
+/* ─── Screenshots grid ─── */
+.screenshots-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.screenshots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.screenshot-card {
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.screenshot-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
+}
+
+.img-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 180px;
+  background: #f0f0f0;
+}
+
+.screenshot-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  color: #555;
+}
+
+/* ─── Employee form extras ─── */
+.photo-hint {
+  color: #666;
+  margin-bottom: 16px;
+}
+
+.file-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.file-name {
+  font-size: 0.875rem;
+  color: #555;
+}
+
+.done-card {
+  text-align: center;
+}
+
+.done-icon {
+  font-size: 72px;
+  width: 72px;
+  height: 72px;
+  color: #43a047;
+  margin-bottom: 16px;
+}

@@ -1,0 +1,108 @@
+<mat-toolbar color="primary">
+  <button mat-icon-button (click)="goBack()" matTooltip="Back to dashboard">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  <span class="toolbar-title">Add Employee</span>
+</mat-toolbar>
+
+<div class="page-content form-page">
+
+  <!-- Step 1: Employee Info -->
+  @if (step() === 'form') {
+    <mat-card class="form-card">
+      <mat-card-header>
+        <mat-card-title>Employee Details</mat-card-title>
+        <mat-card-subtitle>Step 1 of 2</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Full Name</mat-label>
+          <input matInput [(ngModel)]="name" placeholder="Jane Doe" (keyup.enter)="submitForm()" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input
+            matInput
+            type="email"
+            [(ngModel)]="email"
+            placeholder="jane@company.com"
+            (keyup.enter)="submitForm()"
+          />
+        </mat-form-field>
+
+        @if (error()) {
+          <p class="error-msg">{{ error() }}</p>
+        }
+      </mat-card-content>
+
+      <mat-card-actions align="end">
+        <button mat-button (click)="goBack()">Cancel</button>
+        <button
+          mat-flat-button
+          (click)="submitForm()"
+          [disabled]="loading() || !name.trim() || !email.trim()"
+        >
+          @if (loading()) {
+            <mat-spinner diameter="18" />
+          } @else {
+            Next
+          }
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  }
+
+  <!-- Step 2: Photo Upload -->
+  @if (step() === 'photo') {
+    <mat-card class="form-card">
+      <mat-card-header>
+        <mat-card-title>Reference Photo</mat-card-title>
+        <mat-card-subtitle>Step 2 of 2 — used for face recognition login</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <p class="photo-hint">
+          Upload a clear, front-facing photo of the employee. This will be used for biometric login
+          on the desktop app.
+        </p>
+
+        <div class="file-upload-row">
+          <button mat-stroked-button (click)="fileInput.click()">
+            <mat-icon>upload</mat-icon>
+            Choose Photo
+          </button>
+          <span class="file-name">{{ photoFile?.name ?? 'No file chosen' }}</span>
+          <input #fileInput type="file" accept="image/*" hidden (change)="onFileSelected($event)" />
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions align="end">
+        <button mat-button (click)="skipPhoto()">Skip for now</button>
+        <button mat-flat-button (click)="uploadPhoto()" [disabled]="photoLoading() || !photoFile">
+          @if (photoLoading()) {
+            <mat-spinner diameter="18" />
+          } @else {
+            Upload & Finish
+          }
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  }
+
+  <!-- Done -->
+  @if (step() === 'done') {
+    <mat-card class="form-card done-card">
+      <mat-card-content>
+        <mat-icon class="done-icon">check_circle</mat-icon>
+        <h3>Employee created!</h3>
+        <p>The employee has been added successfully.</p>
+      </mat-card-content>
+      <mat-card-actions align="end">
+        <button mat-flat-button (click)="goToDashboard()">Go to Dashboard</button>
+      </mat-card-actions>
+    </mat-card>
+  }
+
+</div>
