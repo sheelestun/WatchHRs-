@@ -10,7 +10,7 @@ services:
     env_file:
       - ./services/APIGateway/.env
     ports:
-      - "8080:8080"
+      - "2320:8080"
     depends_on:
       - postgres
       - redis
@@ -23,7 +23,7 @@ services:
     container_name: watch_hrs_cv_image_storage
     restart: unless-stopped
     ports:
-      - "8081:8081"
+      - "2321:8081"
     volumes:
       - cv_storage_data:/data/storage
 
@@ -37,7 +37,7 @@ services:
       POSTGRES_PASSWORD: api_gateway_pass
       POSTGRES_DB: watch_hrs
     ports:
-      - "5432:5432"
+      - "2322:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -46,7 +46,7 @@ services:
     container_name: watch_hrs_redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "2323:6379"
     volumes:
       - redis_data:/data
 
