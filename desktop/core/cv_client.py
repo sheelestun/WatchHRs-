@@ -16,23 +16,24 @@ class CVStorageClient:
             employeeId (str) or None
         """
         try:
-            success, buffer = cv2.imencode('.png', frame)
+            success, buffer = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 85])
             if not success:
                 return None
-            
-            files = {'file': ('employee.png', buffer.tobytes(), 'image/png')}
+
+            files = {'file': ('employee.jpg', buffer.tobytes(), 'image/jpeg')}
             response = requests.post(
                 f"{self.api_url}/employee/auth",
                 files=files,
                 timeout=10
             )
             
+            print(f"🔍 Auth response: {response.status_code} {response.text[:300]}")
             if response.status_code == 200:
                 data = response.json()
                 return data.get('employeeId')
-            
+
             return None
-            
+
         except Exception as e:
             print(f"❌ CV Auth Error: {e}")
             return None
