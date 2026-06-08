@@ -5,13 +5,19 @@ import os
 from typing import Optional, Tuple
 
 class CVStorageClient:
-    def __init__(self, api_url: str = "https://watchhrs.gehrman.me/api"): # Default to common port, or adjust as needed
+    def __init__(self, api_url: str = "https://watchhrs.gehrman.me/api"):
         self.api_url = api_url
-    
+        self._access_token: Optional[str] = None
+
+    def _auth_headers(self) -> dict:
+        if self._access_token:
+            return {"Authorization": f"Bearer {self._access_token}"}
+        return {}
+
     def authenticate_by_photo(self, frame: np.ndarray) -> Optional[str]:
         """
         Отправить фото на /auth
-        
+
         Returns:
             employeeId (str) or None
         """
@@ -33,6 +39,7 @@ class CVStorageClient:
             print(f"🔍 Auth response: {response.status_code} {response.text[:300]}")
             if response.status_code == 200:
                 data = response.json()
+                self._access_token = data.get('accessToken')
                 return data.get('userID')
 
             ## from develop
@@ -49,7 +56,7 @@ class CVStorageClient:
 
     def send_statistics(self, employee_id: str, mouse_clicks: int, keyboard_clicks: int) -> Optional[str]:
         """
-        POST {address}/statistic/{employeeId}/
+        POST {address}/statistic/{employeeId}
         Returns: screenshotId
         """
         try:
@@ -58,12 +65,14 @@ class CVStorageClient:
                 "count_keyboard_clicks": keyboard_clicks
             }
             response = requests.post(
-                f"{self.api_url}/statistic/{employee_id}/",
+                f"{self.api_url}/statistic/{employee_id}",
                 json=payload,
+                headers=self._auth_headers(),
                 timeout=10
             )
             if response.status_code == 200:
                 return response.json().get("screenshotId")
+            print(f"❌ Stats error: {response.status_code} {response.text[:200]}")
             return None
         except Exception as e:
             print(f"❌ Stats sending error: {e}")
@@ -77,10 +86,11 @@ class CVStorageClient:
         try:
             filename = f"{employee_id}-{screenshot_id}.png"
             with open(file_path, 'rb') as f:
-                files = {'file': (filename, f, 'image/png')}
+                files = {'screenshot': (filename, f, 'image/png')}
                 response = requests.post(
                     f"{self.api_url}/screenshot/{employee_id}",
                     files=files,
+                    headers=self._auth_headers(),
                     timeout=20
                 )
                 return response.status_code == 200
@@ -91,13 +101,21 @@ class CVStorageClient:
     def start_work_session(self, employee_id: str):
         """POST {address}/work_session/{employeeId}/start"""
         try:
-            requests.post(f"{self.api_url}/work_session/{employee_id}/start", timeout=10)
+            requests.post(
+                f"{self.api_url}/work_session/{employee_id}/start",
+                headers=self._auth_headers(),
+                timeout=10,
+            )
         except Exception as e:
             print(f"❌ Start session error: {e}")
 
     def stop_work_session(self, employee_id: str):
         """POST {address}/work_session/{employeeId}/stop"""
         try:
-            requests.post(f"{self.api_url}/work_session/{employee_id}/stop", timeout=10)
+            requests.post(
+                f"{self.api_url}/work_session/{employee_id}/stop",
+                headers=self._auth_headers(),
+                timeout=10,
+            )
         except Exception as e:
             print(f"❌ Stop session error: {e}")
