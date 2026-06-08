@@ -71,10 +71,12 @@ async def get_screenshots(employee_id: str, day: str):
         raise HTTPException(400, "invalid date, use YYYY-MM-DD") from exc
 
     filenames = list_screenshots(employee_id, parsed_day)
-    return [
-        {
-            "filename": name,
-            "downloadUrl": f"/screenshot/{employee_id}/file/{name}",
-        }
-        for name in filenames
-    ]
+    return {
+        "screenshots": [
+            {
+                "filename": name,
+                "url": f"/screenshot/{employee_id}/file/{name}",
+            }
+            for name in filenames
+        ]
+    }
