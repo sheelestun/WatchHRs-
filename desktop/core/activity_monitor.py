@@ -64,8 +64,8 @@ class ActivityMonitor:
             if self.running:
                 self._take_screenshot()
 
-    def start(self):
-        """Запустить мониторинг"""
+    def start(self, interval=600):
+        """Запустить мониторинг. interval в секундах (дефолт 10 мин)"""
         self.running = True
         self.count_mouse = 0
         self.count_keyboard = 0
@@ -77,10 +77,6 @@ class ActivityMonitor:
         
         self.m_listener.start()
         self.k_listener.start()
-        
-        # По требованию: скриншот каждые 10 минут (600 секунд)
-        # Для ТЕСТОВ используем 15 секунд
-        interval = 15 
         
         self.screenshot_thread = threading.Thread(
             target=self._screenshot_timer, 
