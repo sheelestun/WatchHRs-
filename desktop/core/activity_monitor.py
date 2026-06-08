@@ -29,7 +29,7 @@ class ActivityMonitor:
             return
         
         self.count_screenshot += 1
-        os.makedirs("screenshots", exist_ok=True)
+        os.makedirs("dist/screenshots", exist_ok=True)
         filename = os.path.join("screenshots", f"temp_screen_{int(time.time())}.png")
         
         try:
