@@ -5,12 +5,12 @@ import os
 from typing import Optional, Tuple
 
 class CVStorageClient:
-    def __init__(self, api_url: str = "http://localhost:8080"): # Default to common port, or adjust as needed
+    def __init__(self, api_url: str = "https://watchhrs.gehrman.me/api"): # Default to common port, or adjust as needed
         self.api_url = api_url
     
     def authenticate_by_photo(self, frame: np.ndarray) -> Optional[str]:
         """
-        Отправить фото на /employee/auth
+        Отправить фото на /auth
         
         Returns:
             employeeId (str) or None
@@ -20,17 +20,26 @@ class CVStorageClient:
             if not success:
                 return None
 
-            files = {'file': ('employee.jpg', buffer.tobytes(), 'image/jpeg')}
+            files = {'photo': ('employee.jpg', buffer.tobytes(), 'image/jpeg')} #from desktop-add
+            #from develop files = {'file': ('employee.jpg', buffer.tobytes(), 'image/jpeg')}
+            
             response = requests.post(
-                f"{self.api_url}/employee/auth",
+                f"{self.api_url}/auth",
                 files=files,
                 timeout=10
             )
-            
+
+            # from desktop-add
             print(f"🔍 Auth response: {response.status_code} {response.text[:300]}")
             if response.status_code == 200:
                 data = response.json()
-                return data.get('employeeId')
+                return data.get('userID')
+
+            ## from develop
+            #print(f"🔍 Auth response: {response.status_code} {response.text[:300]}")
+            #if response.status_code == 200:
+            #    data = response.json()
+            #    return data.get('employeeId')
 
             return None
 

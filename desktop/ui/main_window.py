@@ -15,7 +15,7 @@ class MainWindow:
         self.root.geometry("400x450")
         
         self.test_mode = test_mode
-        # self.client = CVStorageClient(api_url="http://localhost:8080")
+
         self.client = CVStorageClient(api_url="https://watchhrs.gehrman.me/api")
         self.employee_id = None
         
@@ -131,7 +131,9 @@ class MainWindow:
         if status == states.WORKING:
             self.is_working = True
             self.client.start_work_session(self.employee_id)
-            self.monitor.start()
+            # Передаем интервал: 10 секунд для теста, 600 для продакшна
+            interval = 10 if self.test_mode else 600
+            self.monitor.start(interval=interval)
         else:
             self._stop_work()
 
