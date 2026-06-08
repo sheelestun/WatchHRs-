@@ -4,7 +4,7 @@ from core import states
 from core.cv_client import CVStorageClient
 from core.camera_capture import CameraCapture
 
-cv_client = CVStorageClient(api_url="https://watchhrs.gehrman.me/api/")
+cv_client = CVStorageClient(api_url="https://watchhrs.gehrman.me/api")
 
 # Переменная для хранения текущего ID пользователя
 current_employee_id = None
