@@ -1,0 +1,62 @@
+<div class="login-page">
+  <mat-card class="login-card">
+    <mat-card-header>
+      <mat-card-title>WatchHRs</mat-card-title>
+      <mat-card-subtitle>Manager Registration — create your account</mat-card-subtitle>
+    </mat-card-header>
+
+    @if (managerId()) {
+      <mat-card-content>
+        <p class="register-success">Account created! Save your Manager ID to sign in:</p>
+        <p class="manager-id-display">{{ managerId() }}</p>
+      </mat-card-content>
+      <mat-card-actions align="end">
+        <button mat-flat-button routerLink="/login">Go to Sign In</button>
+      </mat-card-actions>
+    } @else {
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Name</mat-label>
+          <input
+            matInput
+            [(ngModel)]="name"
+            placeholder="Your full name"
+            (keyup.enter)="register()"
+            autocomplete="name"
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input
+            matInput
+            type="email"
+            [(ngModel)]="email"
+            placeholder="you@example.com"
+            (keyup.enter)="register()"
+            autocomplete="email"
+          />
+        </mat-form-field>
+
+        @if (error()) {
+          <p class="error-msg">{{ error() }}</p>
+        }
+      </mat-card-content>
+
+      <mat-card-actions align="end">
+        <a mat-button routerLink="/login">Sign In</a>
+        <button
+          mat-flat-button
+          (click)="register()"
+          [disabled]="loading() || !name.trim() || !email.trim()"
+        >
+          @if (loading()) {
+            <mat-spinner diameter="18" />
+          } @else {
+            Register
+          }
+        </button>
+      </mat-card-actions>
+    }
+  </mat-card>
+</div>

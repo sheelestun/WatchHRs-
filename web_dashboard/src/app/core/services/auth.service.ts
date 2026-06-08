@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
-import { AuthResponse, LoginRequest } from '../models/auth.model';
+import { AuthResponse, LoginRequest, RegisterRequest, RegisterResponse } from '../models/auth.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -21,6 +21,11 @@ export class AuthService {
         this.isLoggedIn.set(true);
       }),
     );
+  }
+
+  register(name: string, email: string): Observable<RegisterResponse> {
+    const body: RegisterRequest = { name, email };
+    return this.http.post<RegisterResponse>('/api/manager', body);
   }
 
   refresh(): Observable<AuthResponse> {

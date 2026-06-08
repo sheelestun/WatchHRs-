@@ -9,7 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-register',
   standalone: true,
   imports: [
     FormsModule,
@@ -20,36 +20,33 @@ import { AuthService } from '../../core/services/auth.service';
     MatButtonModule,
     MatProgressSpinnerModule,
   ],
-  templateUrl: './login.html',
+  templateUrl: './register.html',
 })
-export class LoginComponent {
-  userId = '';
+export class RegisterComponent {
+  name = '';
+  email = '';
   loading = signal(false);
   error = signal('');
+  managerId = signal('');
 
   constructor(
     private auth: AuthService,
     private router: Router,
   ) {}
 
-  login(): void {
-    if (!this.userId.trim()) return;
+  register(): void {
+    if (!this.name.trim() || !this.email.trim()) return;
     this.loading.set(true);
     this.error.set('');
 
-    this.auth.login(this.userId.trim()).subscribe({
+    this.auth.register(this.name.trim(), this.email.trim()).subscribe({
       next: (response) => {
         this.loading.set(false);
-        if (response.role !== 'manager') {
-          this.error.set('Access denied: only managers can use this dashboard.');
-          this.auth.logout();
-          return;
-        }
-        this.router.navigate(['/dashboard']);
+        this.managerId.set(response.managerId);
       },
       error: () => {
         this.loading.set(false);
-        this.error.set('Login failed. Please check your Manager ID and try again.');
+        this.error.set('Registration failed. Please try again.');
       },
     });
   }
