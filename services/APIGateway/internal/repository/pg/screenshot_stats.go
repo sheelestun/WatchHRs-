@@ -29,7 +29,6 @@ func (p *PostgresRepository) GetScreenshotsStatistic(ctx context.Context, employ
 	SELECT id, employee_id, cnt_mouse_clicks, cnt_keyboard_clicks, created_at
 	FROM screenshot_statistics
 	WHERE employee_id = $1
-	WHERE employee_id = $1
 	  AND created_at >= $2
 	  AND created_at <  $2 + INTERVAL '1 day'
 `
