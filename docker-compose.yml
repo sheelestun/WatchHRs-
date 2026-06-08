@@ -1,0 +1,56 @@
+version: "3.9"
+
+services:
+  api_gateway:
+    build:
+      context: ./services/APIGateway
+      dockerfile: docker/Dockerfile
+    container_name: watch_hrs_api_gateway
+    restart: unless-stopped
+    env_file:
+      - ./services/APIGateway/.env
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - redis
+      - cv_image_storage
+
+  cv_image_storage:
+    build:
+      context: ./services/CVImageStorage
+      dockerfile: Dockerfile
+    container_name: watch_hrs_cv_image_storage
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    volumes:
+      - cv_storage_data:/data/storage
+
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: watch_hrs_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: api_gateway_user
+      POSTGRES_PASSWORD: api_gateway_pass
+      POSTGRES_DB: watch_hrs
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: watch_hrs_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:
+  cv_storage_data:
