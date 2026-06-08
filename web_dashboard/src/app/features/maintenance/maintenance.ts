@@ -5,6 +5,11 @@ import { MaintenanceService } from '../../core/services/maintenance.service';
   selector: 'app-maintenance',
   standalone: true,
   styles: [`
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
     .overlay {
       position: fixed;
       inset: 0;
@@ -37,7 +42,7 @@ import { MaintenanceService } from '../../core/services/maintenance.service';
     @if (maintenance.offline()) {
       <div class="overlay">
         <h1>We are down for maintenance, my bad</h1>
-        <img src="assets/kemps.webp" alt="maintenance gif">
+        <img src="kemps.webp" alt="maintenance gif">
       </div>
     }
   `,
