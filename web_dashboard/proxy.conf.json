@@ -1,0 +1,8 @@
+{
+  "/api": {
+    "target": "https://watchhrs.gehrman.me",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "info"
+  }
+}

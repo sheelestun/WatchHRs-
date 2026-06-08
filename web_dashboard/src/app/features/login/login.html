@@ -1,0 +1,39 @@
+<div class="login-page">
+  <mat-card class="login-card">
+    <mat-card-header>
+      <mat-card-title>WatchHRs</mat-card-title>
+      <mat-card-subtitle>Manager Dashboard — sign in to continue</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Manager ID</mat-label>
+        <input
+          matInput
+          [(ngModel)]="userId"
+          placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+          (keyup.enter)="login()"
+          autocomplete="off"
+        />
+      </mat-form-field>
+
+      @if (error()) {
+        <p class="error-msg">{{ error() }}</p>
+      }
+    </mat-card-content>
+
+    <mat-card-actions align="end">
+      <button
+        mat-flat-button
+        (click)="login()"
+        [disabled]="loading() || !userId.trim()"
+      >
+        @if (loading()) {
+          <mat-spinner diameter="18" />
+        } @else {
+          Sign In
+        }
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>

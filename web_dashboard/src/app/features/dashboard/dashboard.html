@@ -1,0 +1,67 @@
+<mat-toolbar color="primary">
+  <mat-icon>schedule</mat-icon>
+  <span class="toolbar-title">WatchHRs</span>
+  <span class="spacer"></span>
+  <button mat-icon-button matTooltip="Logout" (click)="logout()">
+    <mat-icon>logout</mat-icon>
+  </button>
+</mat-toolbar>
+
+<div class="page-content">
+  <div class="page-header">
+    <h2>Employees</h2>
+    <button mat-flat-button (click)="addEmployee()">
+      <mat-icon>person_add</mat-icon>
+      Add Employee
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-center">
+      <mat-spinner />
+    </div>
+  } @else if (employees().length === 0) {
+    <div class="empty-state">
+      <mat-icon>group</mat-icon>
+      <p>No employees yet. Add your first employee to get started.</p>
+      <button mat-stroked-button (click)="addEmployee()">Add Employee</button>
+    </div>
+  } @else {
+    <table mat-table [dataSource]="employees()" class="employees-table mat-elevation-z2">
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Name</th>
+        <td mat-cell *matCellDef="let e">{{ e.name }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="email">
+        <th mat-header-cell *matHeaderCellDef>Email</th>
+        <td mat-cell *matCellDef="let e">{{ e.email }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let e" class="actions-cell">
+          <button mat-icon-button matTooltip="View details" (click)="viewEmployee(e.id)">
+            <mat-icon>visibility</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            color="warn"
+            matTooltip="Delete employee"
+            (click)="deleteEmployee(e, $event)"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr
+        mat-row
+        *matRowDef="let row; columns: displayedColumns"
+        class="clickable-row"
+        (click)="viewEmployee(row.id)"
+      ></tr>
+    </table>
+  }
+</div>
