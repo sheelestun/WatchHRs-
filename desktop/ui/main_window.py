@@ -38,22 +38,22 @@ class MainWindow:
         print(f"📊 Отправка статистики: M:{mouse_clicks}, K:{keyboard_clicks}")
         # 1. Отправляем статистику и получаем screenshotId
         screenshot_id = self.client.send_statistics(self.employee_id, mouse_clicks, keyboard_clicks)
-        
-        if screenshot_id:
-            print(f"📸 Загрузка скриншота {screenshot_id}...")
-            # 2. Загружаем сам скриншот
-            success = self.client.upload_screenshot(self.employee_id, screenshot_id, screenshot_path)
-            if success:
-                print("✅ Скриншот успешно загружен")
-                # Удаляем временный файл
-                try:
-                    os.remove(screenshot_path)
-                except:
-                    pass
+
+        try:
+            if screenshot_id:
+                print(f"📸 Загрузка скриншота {screenshot_id}...")
+                success = self.client.upload_screenshot(self.employee_id, screenshot_id, screenshot_path)
+                if success:
+                    print("✅ Скриншот успешно загружен")
+                else:
+                    print("❌ Ошибка загрузки скриншота")
             else:
-                print("❌ Ошибка загрузки скриншота")
-        else:
-            print("❌ Ошибка получения screenshotId")
+                print("❌ Ошибка получения screenshotId")
+        finally:
+            try:
+                os.remove(screenshot_path)
+            except OSError:
+                pass
 
     def _on_closing(self):
         if self.is_working:

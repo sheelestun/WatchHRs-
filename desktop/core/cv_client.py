@@ -86,7 +86,7 @@ class CVStorageClient:
         try:
             filename = f"{employee_id}-{screenshot_id}.png"
             with open(file_path, 'rb') as f:
-                files = {'file': (filename, f, 'image/png')}
+                files = {'screenshot': (filename, f, 'image/png')}
                 response = requests.post(
                     f"{self.api_url}/screenshot/{employee_id}",
                     files=files,
