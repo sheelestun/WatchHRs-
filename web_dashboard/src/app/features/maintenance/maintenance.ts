@@ -20,14 +20,14 @@ import { MaintenanceService } from '../../core/services/maintenance.service';
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      min-height: 100vh;
+      justify-content: flex-start;
+      overflow-y: auto;
     }
 
     h1 {
       font-size: clamp(1.2rem, 4vw, 2rem);
       font-weight: 500;
-      margin-bottom: 1.5rem;
+      margin: 2rem 0 1.5rem;
       text-align: center;
       padding: 0 1rem;
     }
