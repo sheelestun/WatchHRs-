@@ -93,7 +93,7 @@ class MainWindow:
 
         if self.camera.start():
             self.camera.set_frame_callback(self._update_video_frame)
-        auth_placeholder.check_photo(self._on_auth_result, self.camera)
+        auth_placeholder.check_photo(self._on_auth_result, self.camera, self.client)
 
     def _update_video_frame(self, frame):
         img = Image.fromarray(frame)
