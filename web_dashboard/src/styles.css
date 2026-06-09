@@ -52,6 +52,24 @@ body {
   padding: 16px;
 }
 
+/* ─── Register success ─── */
+.register-success {
+  color: #2e7d32;
+  font-size: 0.95rem;
+  margin: 16px 0 8px;
+}
+
+.manager-id-display {
+  font-family: monospace;
+  font-size: 1rem;
+  background: #f0f4ff;
+  border: 1px solid #c5cae9;
+  border-radius: 6px;
+  padding: 10px 14px;
+  word-break: break-all;
+  margin: 0;
+}
+
 /* ─── Employee form ─── */
 .form-page {
   display: flex;
