@@ -7,3 +7,12 @@ export interface AuthResponse {
   role: 'manager' | 'employee';
   accessToken: string;
 }
+
+export interface RegisterRequest {
+  name: string;
+  email: string;
+}
+
+export interface RegisterResponse {
+  managerId: string;
+}
